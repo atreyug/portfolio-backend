@@ -1,8 +1,6 @@
 from __future__ import annotations
-
-import json
-
 from utils.ai_context import _question_section
+import json
 
 
 def _slim_portfolio(portfolio: dict, has_selected: bool) -> dict:

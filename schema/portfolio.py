@@ -58,7 +58,6 @@ class StockAnalysisRequest(BaseModel):
         value = str(value).strip()
         return value or None
 
-
 # ---------------------------------------------------------------------------
 # Mutual-fund holdings and optional transaction-level SIP data
 # ---------------------------------------------------------------------------
@@ -164,7 +163,6 @@ class MutualFundAnalysisRequest(BaseModel):
             return None
         value = str(value).strip()
         return value or None
-
 
 class MutualFundPortfolioRequest(MutualFundAnalysisRequest):
     """Request contract for complete MF and projection analysis."""

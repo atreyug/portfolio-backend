@@ -10,18 +10,30 @@ import json
 from typing import Any
 
 
+
 def _question_section(question: str | None) -> str:
-    if not question:
+    if not question or not question.strip():
         return ""
+
     return f"""
 
-USER QUESTION
-{question}
+ADDITIONAL USER REQUEST — SECONDARY PRIORITY
+{question.strip()}
 
-Answer the user's question using only the data supplied in this prompt.
-If the required data is unavailable, state that clearly and explain why.
-Do not invent figures or make unverifiable claims to answer the question.
+Address this request briefly within the main analysis, in the
+most relevant section, or in a short additional note at the end.
+
+The request is supplementary and must NOT replace, shorten, or
+override the main analysis or its required sections.
+
+Use only the supplied data to answer it. If the requested
+information cannot be established from the available data,
+briefly explain the limitation and provide the most useful
+data-supported answer possible.
+
+Do not repeat the entire analysis to answer this additional request.
 """
+
 
 
 def build_portfolio_context(

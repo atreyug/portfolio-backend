@@ -61,11 +61,47 @@ async def analyze_portfolio(
         purchase_currencies.append(currency)
 
     reporting_currency = normalize_currency(request.reporting_currency)
-    known_purchase_currencies = {currency for currency in purchase_currencies if currency}
-    if reporting_currency is None and known_purchase_currencies == {CurrencyCode.INR.value}:
-        reporting_currency = CurrencyCode.INR.value
-    elif reporting_currency is None:
-        warnings.append("reporting_currency is required unless all holdings are reliably INR-denominated.")
+
+    known_purchase_currencies = {
+        currency
+        for currency in purchase_currencies
+        if currency is not None
+    }
+
+    market_currencies = [
+        normalize_currency(
+            market_data.get(
+                holding["symbol"].strip().upper(), {}
+            ).get("currency")
+        )
+        for holding in holdings
+    ]
+
+    # Automatically choose a reporting currency only when every holding's
+    # purchase and market currencies match and are known.
+    currencies_match = (
+        len(holdings) > 0
+        and all(
+            purchase_currency is not None
+            and market_currency is not None
+            and purchase_currency == market_currency
+            for purchase_currency, market_currency
+            in zip(purchase_currencies, market_currencies)
+        )
+    )
+
+    common_currencies = (
+        set(purchase_currencies) | set(market_currencies)
+    ) - {None}
+
+    if reporting_currency is None:
+        if currencies_match and len(common_currencies) == 1:
+            reporting_currency = next(iter(common_currencies))
+        else:
+            warnings.append(
+                "A reporting currency is required when holdings use different "
+                "currencies or currency metadata is missing."
+            )
 
     exchange_rates: dict[tuple[str, str], float | None] = {}
     if reporting_currency:
@@ -95,7 +131,7 @@ async def analyze_portfolio(
         market_data=market_data,
         news_data=news_data,
         requested_symbol=primary_symbol,
-        analysis_question=request.analysis_question,
+        analysis_question=request.analysis_question
     )
     explanation = await llm_provider.generate_explanation(context)
     return {
