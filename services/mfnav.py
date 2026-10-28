@@ -12,6 +12,7 @@ Improvements over the original:
   * scheme_code is validated as an integer (the API path param is an int)
   * never raises: failures return {"available": False, "status": ..., "error": ...}
 """
+
 from __future__ import annotations
 
 import asyncio
